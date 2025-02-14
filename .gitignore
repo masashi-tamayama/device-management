@@ -169,3 +169,26 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Python キャッシュファイルを無視
+__pycache__/
+*.py[cod]
+*.so
+
+# 仮想環境を無視
+venv/
+ENV/
+.venv/
+
+# 環境変数ファイル（機密情報）
+.env
+*.env
+
+# npm install で生成されるファイル
+node_modules/
+
+# React のキャッシュファイル
+.cache/
+.next/  # Next.js を使う場合
+build/
+dist/
