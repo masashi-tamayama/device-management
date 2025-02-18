@@ -181,3 +181,102 @@ Python 3.13.2
 pip 24.3.1 from C:\Program Files\Python313\Lib\site-packages\pip (python 3.13)
 ```
 
+# ✅ AWS CLI のインストール & 設定 (#7/2.3)
+
+## 📝 概要
+この手順では、Windows 11 環境で **AWS CLI** を **Microsoft Store 版の影響を受けずに** 正しくインストールし、GitBash で使用できるように設定します。
+
+---
+
+## 📌 **1. AWS CLI のインストール**
+### ✅ **AWS CLI を公式サイトからダウンロード & インストール**
+1. [AWS CLI 公式ダウンロードページ](https://awscli.amazonaws.com/AWSCLIV2.msi) にアクセス
+2. `AWSCLIV2.msi`（Windows 64-bit 版）をダウンロード
+3. ダウンロードした `AWSCLIV2.msi` を実行
+4. **「Add AWS CLI to PATH」にチェックが入っていることを確認**
+5. **「Install」をクリック**
+6. インストール完了後、PC を再起動
+
+---
+
+## 📌 **2. AWS CLI の動作確認**
+### ✅ **AWS CLI のバージョン確認**
+```bash
+aws --version
+```
+**期待する出力**
+```
+aws-cli/2.x.x Python/3.x.x Windows/11 exe/AMD64
+```
+
+---
+
+## 📌 **3. AWS CLI の初期設定**
+### ✅ **IAM ユーザーの作成**
+1. **AWS マネジメントコンソールにログイン**
+2. **[IAM ユーザー作成ページ](https://console.aws.amazon.com/iamv2/home?#/users) にアクセス**
+3. **ユーザー名を入力**（例: `okita-cli-user`）
+4. **「AWS マネジメントコンソールへのアクセス」を無効化**
+5. **「アクセスキーを作成」**
+6. **「コマンドラインインターフェイス (CLI)」にチェックを入れる**
+7. **適切な説明タグを設定**（例: `AWS CLI access key for local development`）
+8. **「作成」**
+
+### ✅ **AWS CLI に認証情報を設定**
+IAM ユーザーの **アクセスキー ID & シークレットキー** を取得し、以下のコマンドを実行：
+
+```bash
+aws configure
+```
+
+**入力内容**
+```
+AWS Access Key ID [None]: AKIA***************
+AWS Secret Access Key [None]: *********************
+Default region name [None]: ap-northeast-1
+Default output format [None]: json
+```
+
+### ✅ **AWS CLI の認証情報確認**
+```bash
+aws configure list
+```
+
+---
+
+## 📌 **4. AWS CLI の動作確認**
+### ✅ **現在の AWS アカウント情報を取得**
+```bash
+aws sts get-caller-identity
+```
+**期待する出力**
+```json
+{
+    "UserId": "AIDA42PHHUNFXVAGTNQAE",
+    "Account": "123456789012",
+    "Arn": "arn:aws:iam::123456789012:user/okita-test"
+}
+```
+
+### ✅ **S3 バケットの一覧を取得**
+```bash
+aws s3 ls
+```
+**バケットが存在しない場合、何も表示されなくても OK！**
+
+### ✅ **EC2 インスタンスの一覧を取得**
+```bash
+aws ec2 describe-instances
+```
+**まだ EC2 を作成していなければ `Reservations: []` のように空のリストが表示される。**
+
+---
+
+## ✅ **セットアップ完了！**
+✅ **AWS CLI を公式サイトからインストール**  
+✅ **環境変数を設定し、AWS CLI が GitBash で使用できることを確認**  
+✅ **`aws configure` で IAM ユーザーの認証情報を設定**  
+✅ **AWS CLI から AWS に接続 & 操作できることを確認**  
+
+🚀 **これで AWS CLI のセットアップが完了しました！** 🎉
+```
