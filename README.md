@@ -279,4 +279,87 @@ aws ec2 describe-instances
 ✅ **AWS CLI から AWS に接続 & 操作できることを確認**  
 
 🚀 **これで AWS CLI のセットアップが完了しました！** 🎉
+
+---
+
+# ✅ Node.js（React 用）のインストール (#8/2.4)
+
+## 📝 概要
+この手順では、Windows 11 環境に **React 開発用の Node.js** を正しくインストールし、動作確認を行います。
+
+---
+
+## 📌 **1. Node.js のインストール**
+### ✅ **公式サイトからダウンロード & インストール**
+1. [Node.js 公式ダウンロードページ](https://nodejs.org/ja/download/) にアクセス
+2. **「LTS（推奨版）」の Windows 版（64-bit）** を選択し、ダウンロード
+3. ダウンロードした `node-vxx.x.x-x64.msi` を実行
+4. **「Next」→「I accept the terms」→「Next」**
+5. **「Add to PATH」にチェックが入っていることを確認**
+6. **「Install」をクリック**
+7. インストール完了後、PC を再起動
+
+---
+
+## 📌 **2. Node.js の動作確認**
+### ✅ **Node.js & npm のバージョン確認**
+```bash
+node -v
+npm -v
 ```
+**期待する出力（例）**
+```
+v18.16.1  # Node.js のバージョン（LTS）
+9.5.1     # npm のバージョン
+```
+✅ **`node` と `npm` のバージョンが表示されれば成功！**
+
+---
+
+## 📌 **3. 環境変数の確認**
+### ✅ **GitBash で確認**
+```bash
+echo $PATH | tr ':' '\n' | grep node
+```
+✅ **`C:\Program Files\nodejs` が含まれていれば OK！**
+
+### ✅ **PowerShell で確認**
+```powershell
+$env:Path -split ";"
+```
+✅ **`C:\Program Files\nodejs` がリストにあれば OK！**
+
+---
+
+## 📌 **4. `npx` の動作確認**
+React プロジェクトを作成する際に使用する `npx` が動作するか確認。
+
+```bash
+npx --version
+```
+✅ **エラーなくバージョンが表示されれば OK！**
+
+---
+
+## 📌 **5. React プロジェクトの作成テスト**
+**React のセットアップが正しくできるか確認するため、一時的なテストプロジェクトを作成。**
+
+```bash
+npx create-react-app test-app
+```
+
+**正常にプロジェクトが作成できたら削除**
+```bash
+rm -rf test-app
+```
+✅ **`npx create-react-app` がエラーなく動作すれば成功！**
+
+---
+
+## ✅ **セットアップ完了！**
+✅ **Node.js を公式サイトからインストール**  
+✅ **環境変数を設定し、GitBash で `node` & `npm` が動作することを確認**  
+✅ **`npx create-react-app` が正常に動作することを確認**  
+✅ **開発環境に影響しないクリーンなセットアップを実施**  
+
+---
