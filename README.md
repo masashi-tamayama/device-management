@@ -146,3 +146,38 @@ DynamoDB は **NoSQLデータベース** なので、データはそのまま JS
 | **フロントエンド** | React を使用し、S3 に静的ファイルを配置し、CloudFront で配信 |
 | **バックエンド** | AWS Lambda（Python）を API Gateway 経由で呼び出す |
 | **データベース** | RDS（MySQL）はリレーショナルデータとして保存、DynamoDB は JSON のまま保存 |
+
+
+# Python 環境構築（Windows 11）
+
+## 1️⃣ Python のインストール手順（Windows 11）
+
+### ✅ 正しい Python のダウンロード
+1. [Python 公式サイト](https://www.python.org/downloads/windows/) にアクセス
+2. 「Looking for a specific release?」のセクションから最新の安定版を選択
+3. **「Windows installer (64-bit)」** をダウンロード  
+   ✅ `python-3.x.x-amd64.exe` を選ぶ（Microsoft Store 版ではない）
+
+### ✅ インストール手順
+1. **ダウンロードしたインストーラーを実行**
+2. **「Add Python to PATH」にチェックを入れる**
+3. **「Install Now」をクリック**
+4. **インストール完了後、「Disable path length limit」をクリック**
+5. **PC を再起動**
+
+---
+
+## 2️⃣ インストール後の確認と Microsoft Store の影響チェック
+
+### ✅ Python の動作確認
+```bash
+python --version
+python3 --version
+pip --version
+
+**成功表示**
+Python 3.13.2
+Python 3.13.2
+pip 24.3.1 from C:\Program Files\Python313\Lib\site-packages\pip (python 3.13)
+```
+
