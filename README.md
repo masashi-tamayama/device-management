@@ -458,3 +458,116 @@ npm install
 ✅ **開発サーバーの停止方法も記載**  
 
 ---
+
+# ✅ 環境変数の管理（.env の作成） (#11/2.7)
+
+## 📝 概要
+この手順では、**バックエンド（Python）とフロントエンド（React）で `.env` を使って環境変数を管理する方法** を説明します。
+
+---
+
+## 📌 **1. `.env` ファイルの作成**
+### ✅ **バックエンド（Python）**
+```bash
+cd backend
+touch .env
+```
+**`backend/.env` に記述する環境変数**
+```
+DATABASE_URL=mysql://user:password@localhost:3306/mydatabase
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+SECRET_KEY=your-secret-key
+```
+
+### ✅ **フロントエンド（React / Vite）**
+```bash
+cd frontend
+touch .env
+```
+**`frontend/.env` に記述する環境変数**
+```
+VITE_API_BASE_URL=http://localhost:8000
+VITE_APP_NAME=ReactApp
+```
+⚠ **Vite の環境変数は `VITE_` で始める必要がある** ので注意。
+
+---
+
+## 📌 **2. `.env` を Git 管理対象外にする**
+```bash
+echo ".env" >> backend/.gitignore
+echo ".env" >> frontend/.gitignore
+```
+✅ **これで `.env` は Git にコミットされなくなり、安全に管理できる！**
+
+---
+
+## 📌 **3. Python 側で `.env` を読み込む**
+### ✅ **`python-dotenv` をインストール**
+```bash
+pip install python-dotenv
+```
+
+### ✅ **`backend/config.py` に `.env` を読み込むコードを追加**
+```python
+import os
+from dotenv import load_dotenv
+
+# .env を読み込む
+load_dotenv()
+
+# 環境変数の取得
+DATABASE_URL = os.getenv("DATABASE_URL")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+# 環境変数の確認（デバッグ用）
+print(f"Database URL: {DATABASE_URL}")
+```
+
+### ✅ **環境変数の読み込みを確認**
+```bash
+python config.py
+```
+✅ **エラーがなく、環境変数が正しく表示されれば成功！**
+
+---
+
+## 📌 **4. React（Vite）側で `.env` を読み込む**
+### ✅ **`frontend/src/config.ts` を作成**
+```typescript
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export const APP_NAME = import.meta.env.VITE_APP_NAME;
+```
+
+### ✅ **`frontend/src/App.tsx` で環境変数を表示**
+```tsx
+import { API_BASE_URL, APP_NAME } from "./config";
+
+function App() {
+  return (
+    <div>
+      <h1>{APP_NAME}</h1>
+      <p>API Base URL: {API_BASE_URL}</p>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### ✅ **環境変数の読み込みを確認**
+```bash
+npm run dev
+```
+**期待する出力**
+```
+  VITE v6.1.0  ready in 400 ms
+
+  ➜  Local:   http://localhost:5173/
+```
+✅ **ブラウザで `http://localhost:5173/` にアクセスし、環境変数が表示されれば成功！**
+
+---
