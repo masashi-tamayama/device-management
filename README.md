@@ -363,3 +363,98 @@ rm -rf test-app
 ✅ **開発環境に影響しないクリーンなセットアップを実施**  
 
 ---
+
+# ✅ React 環境のセットアップ (#10/2.6)
+
+## 📝 概要
+この手順では、**Vite + React（TypeScript + SWC）を使用して、最新の React 開発環境をセットアップ** します。
+
+---
+
+## 📌 **1. React プロジェクトの作成**
+### ✅ **Vite を使って React 環境をセットアップ**
+```bash
+npm create vite@latest frontend --template react
+```
+✅ **対話形式で以下のオプションを選択**
+- `Select a framework:` **React**
+- `Select a variant:` **TypeScript + SWC**
+
+---
+
+## 📌 **2. 依存関係のインストール**
+### ✅ `frontend/` ディレクトリに移動して `npm install` を実行
+```bash
+cd frontend
+npm install
+```
+✅ **エラーが出なければ成功！**
+
+---
+
+## 📌 **3. React アプリの起動**
+```bash
+npm run dev
+```
+✅ **ターミナルに以下のようなメッセージが表示される**
+```
+  VITE v6.1.0  ready in 477 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+```
+✅ **ブラウザで `http://localhost:5173/` にアクセスし、React アプリが動作していることを確認！**
+
+---
+
+## 📌 **4. React 開発サーバーの停止方法**
+### ✅ `Ctrl + C` を押して開発サーバーを停止
+```bash
+Ctrl + C
+```
+✅ **`Terminate batch job (Y/N)?` のようなメッセージが出た場合、`Y` を入力して Enter**
+
+**もし `Ctrl + C` が効かない場合は、以下の方法で強制終了**
+```bash
+lsof -i :5173  # Vite のプロセス ID（PID）を確認
+kill -9 <PID>  # プロセスを強制終了
+```
+
+---
+
+## 📌 **5. よくあるエラーと解決策**
+### **❌ `npm install` 実行時に `package.json` が見つからないエラー**
+```
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory
+```
+✅ **解決策**
+```bash
+npm create vite@latest . --template react
+npm install
+```
+🔹 `package.json` がない場合、上記のコマンドで `frontend/` に Vite のプロジェクトを作成し直す。
+
+---
+
+### **❌ `npm create vite@latest . --template react` 実行時に `Current directory is not empty.`**
+```
+? Current directory is not empty. Please choose how to proceed: 
+  > Remove existing files and continue
+    Ignore files and continue
+    Cancel operation
+```
+✅ **解決策**
+- **既存の `frontend/` をリセットするなら `Remove existing files and continue`**
+- **既存のファイルを保持したいなら `Ignore files and continue`**
+- **一旦キャンセルして確認するなら `Cancel operation`**
+
+---
+
+## ✅ **セットアップ完了！**
+✅ **最新の方法（Vite）で React 環境をセットアップ**  
+✅ **`npm install` で依存関係をインストール**  
+✅ **`npm run dev` でローカル開発環境を起動できることを確認**  
+✅ **開発サーバーの停止方法も記載**  
+
+---
