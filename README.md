@@ -571,3 +571,73 @@ npm run dev
 ✅ **ブラウザで `http://localhost:5173/` にアクセスし、環境変数が表示されれば成功！**
 
 ---
+
+## 🚀 S3 バケット設定手順 (フロントエンド用)
+
+### 1️⃣ S3 バケットの作成
+以下のコマンドで、フロントエンドのアセットをホスティングするための S3 バケットを作成します。
+
+```bash
+aws s3api create-bucket --bucket device-mgmt-frontend-bucket --region ap-northeast-1 --create-bucket-configuration LocationConstraint=ap-northeast-1
+```
+
+✅ **成功時の出力例**
+```json
+{
+    "Location": "http://device-mgmt-frontend-bucket.s3.amazonaws.com/"
+}
+```
+
+---
+
+### 2️⃣ S3 バケットの公開設定
+デフォルトではバケットが非公開になっているため、以下のコマンドで公開アクセスを許可します。
+
+```bash
+aws s3api put-public-access-block --bucket device-mgmt-frontend-bucket --public-access-block-configuration '{"BlockPublicAcls":false,"BlockPublicPolicy":false,"IgnorePublicAcls":false,"RestrictPublicBuckets":false}'
+```
+
+✅ **設定確認**
+```bash
+aws s3api get-public-access-block --bucket device-mgmt-frontend-bucket
+```
+🔹 **期待される出力**
+```json
+{
+    "PublicAccessBlockConfiguration": {
+        "BlockPublicAcls": false,
+        "IgnorePublicAcls": false,
+        "BlockPublicPolicy": false,
+        "RestrictPublicBuckets": false
+    }
+}
+```
+
+---
+
+### 3️⃣ バケットの作成を確認
+作成したバケットが正しく登録されているかを確認するには、以下のコマンドを実行します。
+
+```bash
+aws s3api list-buckets
+```
+
+✅ **期待される出力**
+```json
+{
+    "Buckets": [
+        {
+            "Name": "device-mgmt-frontend-bucket",
+            "CreationDate": "2025-02-18T10:40:24+00:00"
+        }
+    ]
+}
+```
+
+---
+
+### ✅ 設定完了 🎉
+これで、フロントエンドの静的ファイルを S3 にアップロードし、ホスティングする準備が整いました！ 🚀
+
+
+---
