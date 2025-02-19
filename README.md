@@ -641,3 +641,159 @@ aws s3api list-buckets
 
 
 ---
+
+# 🚀 CloudFront を使用した S3 静的サイトホスティング
+
+## **1️⃣ CloudFront S3 Access Denied エラーの発生と解消手順**
+
+### **❌ エラー発生のタイミング**
+CloudFront を通じて S3 にホストした静的サイト (`index.html`) にアクセスした際に、**以下のエラーが発生しました。**
+
+```xml
+<Error>
+<Code>AccessDenied</Code>
+<Message>Access Denied</Message>
+<RequestId>Q8ZNTG61DHYVZY2R</RequestId>
+<HostId>fquG2agx//MMoGK8iN/96xH2RyBM1ITVwjwaAfH68pZpV1GaigsRs2Gtyyo8ByHPwkahB+rMmGaOnHyP5kvQV7Y5ezcIiSzJqwKwocf30cs=</HostId>
+</Error>
+```
+
+**このエラーの原因**
+1. **CloudFront のオリジン設定が誤っていた**
+   - `distribution-config.json` の `"Origins.DomainName"` が `d1zw3p63uw42m7.cloudfront.net` になっており、本来指定すべき `device-mgmt-frontend-bucket.s3.amazonaws.com` になっていなかった。
+
+2. **S3 バケットが CloudFront からのアクセスを許可していなかった**
+   - S3 バケットポリシーが CloudFront からの `s3:GetObject` を許可していなかった。
+
+3. **S3 のパブリックアクセス設定が適切でなかった**
+   - `"BlockPublicPolicy": true` になっており、CloudFront 経由のリクエストもブロックされていた。
+
+4. **CloudFront のキャッシュが古い設定を保持していた**
+   - 設定を変更しても、CloudFront に古いバージョンがキャッシュされており、更新が適用されていなかった。
+
+---
+
+## **2️⃣ CloudFront S3 Access Denied エラーの解決手順**
+
+### **1. Origin Access Control (OAC) の作成**
+```bash
+aws cloudfront create-origin-access-control \
+    --origin-access-control-config '{
+        "Name": "device-mgmt-frontend-OAC",
+        "Description": "OAC for frontend",
+        "SigningBehavior": "always",
+        "SigningProtocol": "sigv4",
+        "OriginAccessControlOriginType": "s3"
+    }'
+```
+
+✅ **作成された OAC の ID (`E1JCQCLG0RPNWU`) を取得し、CloudFront に適用。**
+
+---
+
+### **2. CloudFront のオリジン設定を OAC に更新**
+#### **📌 `distribution-config.json` 修正**
+```json
+"Origins": {
+    "Items": [
+        {
+            "Id": "device-mgmt-frontend-bucket",
+            "DomainName": "device-mgmt-frontend-bucket.s3.amazonaws.com",
+            "OriginAccessControlId": "E1JCQCLG0RPNWU"
+        }
+    ]
+}
+```
+
+✅ **CloudFront の設定を適用**
+```bash
+aws cloudfront update-distribution --id E1OJBU6FBKY6X --if-match $(aws cloudfront get-distribution --id E1OJBU6FBKY6X --query "ETag" --output text) --distribution-config file://distribution-config.json
+```
+
+---
+
+### **3. S3 バケットポリシーを更新**
+#### **📌 `bucket-policy.json`**
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowCloudFrontServicePrincipal",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::device-mgmt-frontend-bucket/*",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "arn:aws:cloudfront::881490109259:distribution/E1OJBU6FBKY6X"
+                }
+            }
+        }
+    ]
+}
+```
+
+✅ **バケットポリシーを適用**
+```bash
+aws s3api put-bucket-policy --bucket device-mgmt-frontend-bucket --policy file://bucket-policy.json
+```
+
+---
+
+### **4. S3 のパブリックアクセス設定を修正**
+```bash
+aws s3api put-public-access-block \
+    --bucket device-mgmt-frontend-bucket \
+    --public-access-block-configuration '{
+        "BlockPublicAcls": true,
+        "IgnorePublicAcls": true,
+        "BlockPublicPolicy": false,
+        "RestrictPublicBuckets": false
+    }'
+```
+
+---
+
+### **5. テストファイルのアップロードとキャッシュ無効化**
+CloudFront の設定変更が正しく適用されているかを確認するため、**テスト用の `index.html` をアップロード** し、**キャッシュを無効化** しました。
+
+```bash
+# テスト用 HTML ファイルを作成
+echo "<html><body><h1>Hello from S3 via CloudFront</h1></body></html>" > index.html
+
+# S3 にアップロード
+aws s3 cp index.html s3://device-mgmt-frontend-bucket/
+
+# CloudFront のキャッシュを無効化
+aws cloudfront create-invalidation --distribution-id E1OJBU6FBKY6X --paths "/*"
+```
+
+✅ **S3 にファイルをアップロードし、キャッシュをクリアすることで最新の変更が反映される**
+
+---
+
+### **6. 動作確認**
+```bash
+https://d1zw3p63uw42m7.cloudfront.net/index.html
+```
+✅ **"Hello from S3 via CloudFront" が表示されれば成功 🎉**
+
+---
+
+## **3️⃣ 重要なポイント**
+1. **OAC の作成と正しい ID の設定**
+2. **CloudFront 設定での OAC ID の正確な反映**
+3. **S3 バケットポリシーでの CloudFront サービスプリンシパルの許可**
+4. **パブリックアクセスブロック設定の適切な構成**
+5. **キャッシュ無効化による変更の反映**
+6. **テスト用ファイルのアップロードと CloudFront 経由でのアクセス確認**
+
+---
+
+## **4️⃣ まとめ**
+この手順により、S3 を **パブリックにせず、CloudFront 経由でのみアクセスできる構成** が完成しました。
+
+---
