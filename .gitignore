@@ -192,3 +192,6 @@ node_modules/
 .next/  # Next.js を使う場合
 build/
 dist/
+
+# Lambda package directory
+backend/lambda/package/
