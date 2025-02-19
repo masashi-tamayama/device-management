@@ -29,10 +29,8 @@ def init_db():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS devices (
                 id VARCHAR(36) PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                type VARCHAR(50) NOT NULL,
-                status VARCHAR(50) DEFAULT 'active',
-                location VARCHAR(255),
+                name VARCHAR(255) NOT NULL COMMENT '機器名',
+                manufacturer VARCHAR(255) NOT NULL COMMENT 'メーカー名',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
@@ -44,6 +42,3 @@ def init_db():
     finally:
         cursor.close()
         connection.close()
-
-# データベースの初期化（Lambda関数の初回実行時に実行される）
-init_db() 
