@@ -1,6 +1,11 @@
 import json
 import uuid
-from common.db import get_db_connection
+from common.db_interface import get_db_interface
+import logging
+
+# ロガーの設定
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def handler(event, context):
     """デバイスを作成するLambda関数"""
@@ -9,66 +14,43 @@ def handler(event, context):
         body = json.loads(event['body'])
         
         # 必須フィールドの検証
-        required_fields = ['name', 'type']
+        required_fields = ['name', 'manufacturer']
         for field in required_fields:
             if field not in body:
                 return {
                     'statusCode': 400,
                     'body': json.dumps({
-                        'error': f'Missing required field: {field}'
+                        'error': f'必須フィールドがありません: {field}'
                     })
                 }
         
         # デバイスIDの生成
         device_id = str(uuid.uuid4())
         
-        # データベース接続
-        connection = get_db_connection()
-        cursor = connection.cursor()
+        # デバイスデータの準備
+        device_data = {
+            'id': device_id,
+            'name': body['name'],
+            'manufacturer': body['manufacturer']
+        }
         
-        try:
-            # デバイスの作成
-            query = """
-                INSERT INTO devices (id, name, type, location, status)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-            values = (
-                device_id,
-                body['name'],
-                body['type'],
-                body.get('location', ''),  # オプショナル
-                body.get('status', 'active')  # デフォルト: active
-            )
-            
-            cursor.execute(query, values)
-            connection.commit()
-            
-            return {
-                'statusCode': 201,
-                'body': json.dumps({
-                    'message': 'Device created successfully',
-                    'device_id': device_id
-                })
-            }
-            
-        except Exception as e:
-            print(f"データベースエラー: {e}")
-            return {
-                'statusCode': 500,
-                'body': json.dumps({
-                    'error': 'Internal server error'
-                })
-            }
-            
-        finally:
-            cursor.close()
-            connection.close()
+        # データベース操作
+        db = get_db_interface()
+        created_device = db.create_device(device_data)
+        
+        return {
+            'statusCode': 201,
+            'body': json.dumps({
+                'message': 'デバイスを作成しました',
+                'device': created_device
+            })
+        }
             
     except Exception as e:
-        print(f"エラー: {e}")
+        logger.error(f"エラー: {str(e)}")
         return {
-            'statusCode': 400,
+            'statusCode': 500,
             'body': json.dumps({
-                'error': str(e)
+                'error': 'Internal server error'
             })
         } 

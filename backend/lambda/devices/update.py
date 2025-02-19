@@ -1,5 +1,10 @@
 import json
-from common.db import get_db_connection
+from common.db_interface import get_db_interface
+import logging
+
+# ロガーの設定
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def handler(event, context):
     """デバイスを更新するLambda関数"""
@@ -11,69 +16,46 @@ def handler(event, context):
         body = json.loads(event['body'])
         
         # 更新可能なフィールド
-        updatable_fields = ['name', 'type', 'location', 'status']
-        update_data = {k: v for k, v in body.items() if k in updatable_fields}
+        allowed_fields = ['name', 'manufacturer']
+        update_data = {k: v for k, v in body.items() if k in allowed_fields}
         
         if not update_data:
             return {
                 'statusCode': 400,
                 'body': json.dumps({
-                    'error': 'No valid fields to update'
+                    'error': '更新可能なフィールドがありません'
                 })
             }
         
-        # データベース接続
-        connection = get_db_connection()
-        cursor = connection.cursor()
+        # データベース操作
+        db = get_db_interface()
         
-        try:
-            # デバイスの存在確認
-            cursor.execute("SELECT id FROM devices WHERE id = %s", (device_id,))
-            if not cursor.fetchone():
-                return {
-                    'statusCode': 404,
-                    'body': json.dumps({
-                        'error': 'Device not found'
-                    })
-                }
-            
-            # UPDATE文の構築
-            set_clause = ", ".join([f"{field} = %s" for field in update_data.keys()])
-            query = f"UPDATE devices SET {set_clause} WHERE id = %s"
-            
-            # パラメータの準備
-            params = list(update_data.values()) + [device_id]
-            
-            # 更新の実行
-            cursor.execute(query, params)
-            connection.commit()
-            
+        # デバイスの存在確認
+        existing_device = db.get_device(device_id)
+        if not existing_device:
             return {
-                'statusCode': 200,
+                'statusCode': 404,
                 'body': json.dumps({
-                    'message': 'Device updated successfully',
-                    'device_id': device_id
+                    'error': 'デバイスが見つかりません'
                 })
             }
-            
-        except Exception as e:
-            print(f"データベースエラー: {e}")
-            return {
-                'statusCode': 500,
-                'body': json.dumps({
-                    'error': 'Internal server error'
-                })
-            }
-            
-        finally:
-            cursor.close()
-            connection.close()
+        
+        # デバイスの更新
+        updated_device = db.update_device(device_id, update_data)
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps({
+                'message': 'デバイスを更新しました',
+                'device': updated_device
+            }, default=str)
+        }
             
     except Exception as e:
-        print(f"エラー: {e}")
+        logger.error(f"エラー: {str(e)}")
         return {
-            'statusCode': 400,
+            'statusCode': 500,
             'body': json.dumps({
-                'error': str(e)
+                'error': 'Internal server error'
             })
         } 
