@@ -797,3 +797,106 @@ https://d1zw3p63uw42m7.cloudfront.net/index.html
 この手順により、S3 を **パブリックにせず、CloudFront 経由でのみアクセスできる構成** が完成しました。
 
 ---
+
+# 🔧 機器管理システム
+
+[... existing content ...]
+
+# ✅ MySQL環境構築（Windows 11）
+
+## 📝 概要
+この手順では、Windows 11環境でMySQLをセットアップし、アプリケーションから接続できる状態にするまでの手順を説明します。
+
+## 📌 1. MySQLのインストール
+### ✅ MySQL Installerのダウンロード & インストール
+1. [MySQL公式サイト](https://dev.mysql.com/downloads/installer/)からMySQL Installerをダウンロード
+2. インストーラーを実行し、以下の項目を選択：
+   - MySQL Server 8.0
+   - MySQL Workbench
+   - MySQL Shell
+   - Connector/Python
+
+### ✅ サーバー設定
+1. **Windows Service設定**
+   - Configure MySQL Server as a Windows Service: ✓
+   - Service Name: MySQL80
+   - Start the MySQL Server at System Startup: ✓
+   - Standard System Account: ✓
+
+2. **認証設定**
+   - Authentication Method: Use Strong Password Encryption
+   - Root Password: 設定したパスワードを安全に保管
+
+## 📌 2. データベースとテーブルの作成
+### ✅ MySQL Workbenchでの接続設定
+1. MySQL Workbenchを起動
+2. 「+」ボタンで新規接続を作成：
+   - Connection Name: Local MySQL80
+   - Hostname: localhost
+   - Port: 3306
+   - Username: root
+   - Password: 設定したパスワード
+   - Default Schema: lambdadb
+
+### ✅ データベースとテーブルの作成
+```sql
+-- データベース作成
+CREATE DATABASE lambdadb;
+USE lambdadb;
+
+-- デバイステーブルの作成
+CREATE TABLE devices (
+    id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL COMMENT '機器名',
+    manufacturer VARCHAR(255) NOT NULL COMMENT 'メーカー名',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- インデックスの作成
+CREATE INDEX idx_devices_name ON devices(name);
+CREATE INDEX idx_devices_manufacturer ON devices(manufacturer);
+
+-- テーブルコメントの設定
+ALTER TABLE devices COMMENT = '機器管理用のテーブル';
+```
+
+## 📌 3. アプリケーション設定
+### ✅ 環境変数の設定
+`backend/.env`ファイルに以下の設定を追加：
+```
+# データベース設定
+DB_TYPE=rds
+
+# RDS設定
+RDS_HOST=localhost
+RDS_PORT=3306
+RDS_USER=root
+RDS_PASSWORD=your_password
+RDS_DATABASE=lambdadb
+```
+
+### ✅ 動作確認
+1. テストデータの挿入：
+```sql
+INSERT INTO devices (id, name, manufacturer) VALUES 
+(UUID(), 'エアコン', 'パナソニック'),
+(UUID(), '冷蔵庫', '日立'),
+(UUID(), '洗濯機', 'シャープ');
+```
+
+2. Pythonスクリプトでの接続テスト：
+```bash
+cd backend/lambda
+python devices/scripts/insert_test_data.py
+```
+
+## 📌 4. トラブルシューティング
+### ✅ よくあるエラーと解決策
+1. **Access denied for user 'root'@'localhost'**
+   - MySQLのrootパスワードが正しく設定されているか確認
+   - `.env`ファイルのパスワードが正しいか確認
+
+2. **Can't connect to MySQL server on 'localhost'**
+   - MySQL Serverが起動しているか確認
+   - ポート3306が使用可能か確認
