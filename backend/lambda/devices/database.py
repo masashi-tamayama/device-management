@@ -9,16 +9,16 @@ load_dotenv()
 
 # データベース接続情報
 DB_TYPE = os.getenv("DB_TYPE", "rds")
-RDS_HOST = os.getenv("RDS_HOST", "localhost")
-RDS_PORT = os.getenv("RDS_PORT", "3306")
-RDS_USER = os.getenv("RDS_USER", "root")
-RDS_PASSWORD = os.getenv("RDS_PASSWORD", "")
-RDS_DATABASE = os.getenv("RDS_DATABASE", "lambdadb")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "3306")
+DB_USER = os.getenv("DB_USER", "root")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+DB_NAME = os.getenv("DB_NAME", "lambdadb")
 
-# SQLAlchemy用のデータベースURL（文字コード設定を追加）
-DATABASE_URL = f"mysql+mysqlconnector://{RDS_USER}:{RDS_PASSWORD}@{RDS_HOST}:{RDS_PORT}/{RDS_DATABASE}?charset=utf8mb4&collation=utf8mb4_unicode_ci"
+# SQLAlchemy用のデータベースURL
+DATABASE_URL = f"mysql+mysqlconnector://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4&collation=utf8mb4_unicode_ci"
 
-# エンジンの作成（文字コード設定を追加）
+# エンジンの作成
 engine = create_engine(
     DATABASE_URL,
     pool_recycle=3600,
@@ -42,4 +42,4 @@ def get_db():
     try:
         yield db
     finally:
-        db.close() 
+        db.close()
