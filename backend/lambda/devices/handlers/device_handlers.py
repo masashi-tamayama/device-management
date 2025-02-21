@@ -81,7 +81,10 @@ def list_devices(db: Session = Depends(get_db)):
         )
     except Exception as e:
         logger.error(f"デバイス一覧取得エラー: {str(e)}")
-        raise DatabaseError("デバイス一覧の取得中にエラーが発生しました", e)
+        return UnicodeJSONResponse(
+            content={"error": "デバイス一覧の取得中にエラーが発生しました"},
+            status_code=500
+        )
 
 @router.get("/devices/{device_id}", response_model=DeviceSchema)
 def get_device(device_id: str, db: Session = Depends(get_db)):

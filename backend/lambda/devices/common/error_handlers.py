@@ -38,13 +38,6 @@ async def general_exception_handler(
     return JSONResponse(
         status_code=500,
         content={
-            "error": {
-                "code": "INTERNAL_ERROR",
-                "message": "内部サーバーエラーが発生しました",
-                "details": {
-                    "type": exc.__class__.__name__,
-                    "message": str(exc)
-                }
-            }
+            "error": "Internal server error"
         }
     ) 
