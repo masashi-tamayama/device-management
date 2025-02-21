@@ -34,6 +34,7 @@ class DatabaseConnectionPool:
         try:
             db_config = {
                 'host': os.getenv('DB_HOST', 'localhost'),
+                'port': int(os.getenv('DB_PORT', '3306')),
                 'user': os.getenv('DB_USER', 'root'),
                 'password': os.getenv('DB_PASSWORD', ''),
                 'database': os.getenv('DB_NAME', 'lambdadb'),
@@ -41,7 +42,10 @@ class DatabaseConnectionPool:
                 'collation': 'utf8mb4_unicode_ci',
                 'pool_name': 'device_management_pool',
                 'pool_size': int(os.getenv('DB_POOL_SIZE', '5')),
-                'pool_reset_session': True
+                'pool_reset_session': True,
+                'auth_plugin': 'mysql_native_password',
+                'connect_timeout': 10,
+                'connection_timeout': 10
             }
             
             self._pool = mysql.connector.pooling.MySQLConnectionPool(**db_config)
