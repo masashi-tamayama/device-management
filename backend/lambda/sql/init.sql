@@ -1,9 +1,22 @@
+-- 文字コードの設定
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+SET character_set_client = utf8mb4;
+SET character_set_connection = utf8mb4;
+SET character_set_database = utf8mb4;
+SET character_set_results = utf8mb4;
+SET character_set_server = utf8mb4;
+
 -- デバイス管理用のデータベースを作成
-CREATE DATABASE IF NOT EXISTS lambdadb;
+DROP DATABASE IF EXISTS lambdadb;
+CREATE DATABASE lambdadb
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
 USE lambdadb;
 
 -- デバイステーブルの作成
-CREATE TABLE IF NOT EXISTS devices (
+DROP TABLE IF EXISTS devices;
+CREATE TABLE devices (
     id VARCHAR(36) PRIMARY KEY,
     name VARCHAR(255) NOT NULL COMMENT '機器名',
     manufacturer VARCHAR(255) NOT NULL COMMENT 'メーカー名',
@@ -21,7 +34,7 @@ ALTER TABLE devices
 
 ALTER TABLE devices
     MODIFY COLUMN id VARCHAR(36) COMMENT 'デバイスの一意識別子（UUID）',
-    MODIFY COLUMN name VARCHAR(255) COMMENT '機器名',
-    MODIFY COLUMN manufacturer VARCHAR(255) COMMENT 'メーカー名',
+    MODIFY COLUMN name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '機器名',
+    MODIFY COLUMN manufacturer VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'メーカー名',
     MODIFY COLUMN created_at TIMESTAMP COMMENT 'レコード作成日時',
     MODIFY COLUMN updated_at TIMESTAMP COMMENT 'レコード更新日時';
