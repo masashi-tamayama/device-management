@@ -15,11 +15,20 @@ RDS_USER = os.getenv("RDS_USER", "root")
 RDS_PASSWORD = os.getenv("RDS_PASSWORD", "")
 RDS_DATABASE = os.getenv("RDS_DATABASE", "lambdadb")
 
-# SQLAlchemy用のデータベースURL
-DATABASE_URL = f"mysql+mysqlconnector://{RDS_USER}:{RDS_PASSWORD}@{RDS_HOST}:{RDS_PORT}/{RDS_DATABASE}"
+# SQLAlchemy用のデータベースURL（文字コード設定を追加）
+DATABASE_URL = f"mysql+mysqlconnector://{RDS_USER}:{RDS_PASSWORD}@{RDS_HOST}:{RDS_PORT}/{RDS_DATABASE}?charset=utf8mb4&collation=utf8mb4_unicode_ci"
 
-# エンジンの作成
-engine = create_engine(DATABASE_URL)
+# エンジンの作成（文字コード設定を追加）
+engine = create_engine(
+    DATABASE_URL,
+    pool_recycle=3600,
+    pool_pre_ping=True,
+    connect_args={
+        "charset": "utf8mb4",
+        "use_unicode": True,
+        "collation": "utf8mb4_unicode_ci"
+    }
+)
 
 # セッションの作成
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
