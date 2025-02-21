@@ -1,8 +1,14 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
+from fastapi import HTTPException
 from dotenv import load_dotenv
+import logging
+
+# ロガーの設定
+logger = logging.getLogger(__name__)
 
 # 環境変数の読み込み
 load_dotenv()
@@ -40,6 +46,12 @@ Base = declarative_base()
 def get_db():
     db = SessionLocal()
     try:
+        # 接続テスト
+        db.execute(text("SELECT 1"))
         yield db
+    except SQLAlchemyError as e:
+        logger.error(f"データベース接続エラー: {str(e)}")
+        db.close()
+        raise HTTPException(status_code=500, detail="データベース接続エラーが発生しました")
     finally:
         db.close()
