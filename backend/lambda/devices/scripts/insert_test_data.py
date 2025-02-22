@@ -16,45 +16,48 @@ logger = logging.getLogger(__name__)
 # 環境変数の読み込み
 load_dotenv()
 
-# テスト用の環境変数を一時的に設定
-os.environ['RDS_HOST'] = 'localhost'
-os.environ['RDS_PORT'] = '3306'
-os.environ['RDS_USER'] = 'root'
-os.environ['RDS_PASSWORD'] = 'okitasouji'
-os.environ['RDS_DATABASE'] = 'lambdadb'
+# DynamoDB用の環境変数を設定
+os.environ['DB_TYPE'] = 'dynamodb'
+os.environ['DYNAMODB_TABLE_NAME'] = 'devices'
 
 def generate_test_data():
     """テストデータを生成する"""
+    current_time = datetime.now().isoformat()
     return [
         {
             'id': str(uuid.uuid4()),
             'name': 'エアコン',
             'manufacturer': 'パナソニック',
-            'created_at': datetime.now().isoformat()
+            'created_at': current_time,
+            'updated_at': current_time
         },
         {
             'id': str(uuid.uuid4()),
             'name': '冷蔵庫',
             'manufacturer': '日立',
-            'created_at': datetime.now().isoformat()
+            'created_at': current_time,
+            'updated_at': current_time
         },
         {
             'id': str(uuid.uuid4()),
             'name': '洗濯機',
             'manufacturer': 'シャープ',
-            'created_at': datetime.now().isoformat()
+            'created_at': current_time,
+            'updated_at': current_time
         },
         {
             'id': str(uuid.uuid4()),
             'name': '電子レンジ',
             'manufacturer': '東芝',
-            'created_at': datetime.now().isoformat()
+            'created_at': current_time,
+            'updated_at': current_time
         },
         {
             'id': str(uuid.uuid4()),
             'name': '掃除機',
             'manufacturer': 'ダイソン',
-            'created_at': datetime.now().isoformat()
+            'created_at': current_time,
+            'updated_at': current_time
         }
     ]
 
@@ -63,7 +66,7 @@ def insert_test_data():
     try:
         # データベースインターフェースの取得
         db = get_db_interface()
-        logger.info(f"データベースに接続しました（タイプ: {os.getenv('DB_TYPE', 'rds')}）")
+        logger.info(f"データベースに接続しました（タイプ: {os.getenv('DB_TYPE', 'dynamodb')}）")
 
         # 既存のデータを確認
         existing_devices = db.list_devices()
