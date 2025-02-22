@@ -900,3 +900,185 @@ python devices/scripts/insert_test_data.py
 2. **Can't connect to MySQL server on 'localhost'**
    - MySQL Serverが起動しているか確認
    - ポート3306が使用可能か確認
+
+3. **MySQL server has gone away**
+   - データベース接続のタイムアウト設定を確認
+   - データベースの負荷やネットワークの状態を確認
+
+---
+
+# 🚀 Swagger UI / ReDoc 使用ガイド
+
+## 📝 概要
+このガイドでは、FastAPIが提供する2つのAPIドキュメントツール（Swagger UIとReDoc）の使用方法について説明します。
+
+## 🛠️ 前提条件
+
+### 必要なパッケージ
+```bash
+pip install fastapi uvicorn
+```
+
+## 🔧 開発サーバーの起動手順
+
+### 1. PowerShellを開く
+スタートメニューまたは `Win + X` から PowerShellを起動します。
+
+### 2. プロジェクトディレクトリに移動
+```powershell
+cd C:\Users\your-username\projects\device-management\backend\lambda
+```
+
+### 3. PYTHONPATHの設定とサーバー起動
+```powershell
+$env:PYTHONPATH = "." ; python -m uvicorn devices.main:app --reload
+```
+
+### 4. 起動確認
+以下のようなメッセージが表示されれば成功です：
+```
+INFO:     Will watch for changes in these directories: ['C:\\Users\\...']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [xxxx] using StatReload
+INFO:     Started server process [xxxx]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+```
+
+## 📚 APIドキュメントへのアクセス
+
+### Swagger UI
+- URL: http://127.0.0.1:8000/docs
+- 特徴：
+  - インタラクティブなAPIテスト機能
+  - リクエスト/レスポンスの例を表示
+  - 実際のAPIを試すことが可能
+
+### ReDoc
+- URL: http://127.0.0.1:8000/redoc
+- 特徴：
+  - 読みやすいドキュメント形式
+  - 詳細なスキーマ情報
+  - 印刷に適したレイアウト
+
+## 💡 Swagger UIの使用方法
+
+### 1. エンドポイントの選択
+- 画面左側のエンドポイント一覧から操作したいAPIを選択
+- 例：`PUT /api/v1/devices/{device_id}`
+
+### 2. APIのテスト
+1. 「Try it out」ボタンをクリック
+2. パラメータを入力
+   - URLパラメータ（例：`device_id`）
+   - リクエストボディ（必要な場合）
+3. 「Execute」ボタンをクリック
+4. レスポンスを確認
+
+### リクエスト例（デバイス更新）
+```json
+{
+  "name": "更新後のデバイス名",
+  "manufacturer": "更新後のメーカー名"
+}
+```
+
+### レスポンス例
+```json
+{
+  "name": "更新後のデバイス名",
+  "manufacturer": "更新後のメーカー名",
+  "id": "device-id",
+  "created_at": "2024-02-20T10:00:00",
+  "updated_at": "2024-02-20T11:00:00"
+}
+```
+
+## 📖 ReDocの使用方法
+
+### 1. スキーマの確認
+- 左側のメニューから確認したいエンドポイントを選択
+- リクエスト/レスポンスのスキーマ情報を確認
+
+### 2. モデルの確認
+- 画面右側に表示されるモデル定義を確認
+- 各フィールドの型や制約を確認
+
+## ⚠️ 注意事項
+
+### セキュリティ
+- 開発環境でのみ使用してください
+- 本番環境では無効化することを推奨
+
+### サーバーの停止方法
+1. PowerShellウィンドウで `Ctrl + C` を押す
+2. サーバープロセスが終了することを確認
+
+## 🔍 トラブルシューティング
+
+### サーバーが起動しない場合
+1. ポート8000が使用中でないか確認
+2. 必要なパッケージがインストールされているか確認
+3. PYTHONPATHが正しく設定されているか確認
+
+### ドキュメントにアクセスできない場合
+1. サーバーが正常に起動しているか確認
+2. URLが正しいか確認（http://127.0.0.1:8000/docs または /redoc）
+3. ファイアウォールの設定を確認
+
+## 📝 補足情報
+
+### カスタマイズ可能な項目
+- タイトル
+- 説明
+- バージョン
+- タグ
+- セキュリティ定義
+
+### ドキュメント生成の自動化
+- APIのコードからドキュメントが自動生成
+- コードの変更が即座にドキュメントに反映
+- OpenAPI（Swagger）仕様に準拠
+
+---
+
+# 🚀 Swagger UI / ReDoc 使用ガイド
+
+## 📝 概要
+このガイドでは、FastAPIが提供する2つのAPIドキュメントツール（Swagger UIとReDoc）の使用方法について説明します。
+
+---
+
+## 🛠️ 前提条件
+
+### 必要なパッケージのインストール（初回のみ）
+```bash
+pip install fastapi uvicorn
+```
+※ パッケージのインストールは初回のみ必要です。一度インストールすれば、以降は再インストール不要です。
+
+### インストール状態の確認方法
+```bash
+pip list | findstr "fastapi"
+pip list | findstr "uvicorn"
+```
+
+## 🔧 開発サーバーの起動手順
+
+### 1. PowerShellを開く
+スタートメニューまたは `Win + X` から PowerShellを起動します。
+
+### 2. プロジェクトディレクトリに移動
+```powershell
+cd C:\Users\your-username\projects\device-management\backend\lambda
+```
+
+### 3. PYTHONPATHの設定とサーバー起動
+```powershell
+$env:PYTHONPATH = "." ; python -m uvicorn devices.main:app --reload
+```
+※ `python -m`を使用することで、インストール済みのuvicornを確実に実行できます。
+
+// ... 既存の内容は変更なし ...
+
+---

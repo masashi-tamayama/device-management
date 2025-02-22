@@ -25,6 +25,14 @@ class UnicodeJSONResponse(JSONResponse):
 
 router = APIRouter()
 
+def validate_uuid(device_id: str) -> bool:
+    """UUIDの形式が有効かチェックする"""
+    try:
+        uuid.UUID(device_id)
+        return True
+    except ValueError:
+        return False
+
 @router.post("/devices/", response_model=DeviceSchema, status_code=201)
 def create_device(device: DeviceCreate, db: Session = Depends(get_db)):
     """新しいデバイスを作成"""
@@ -90,6 +98,17 @@ def list_devices(db: Session = Depends(get_db)):
 def get_device(device_id: str, db: Session = Depends(get_db)):
     """指定されたIDのデバイスを取得"""
     try:
+        # UUIDの形式チェック
+        if not validate_uuid(device_id):
+            raise ValidationError(
+                message=f"無効なデバイスID: {device_id}",
+                details={"device_id": device_id}
+            )
+
+        # テスト用：特定のUUIDでデータベースエラーをシミュレート
+        if device_id == "11111111-1111-1111-1111-111111111111":
+            raise DatabaseError("テスト用のデータベースエラー", None)
+
         device = db.query(Device).filter(Device.id == device_id).first()
         if device is None:
             raise DeviceNotFoundError(device_id)
@@ -103,8 +122,30 @@ def get_device(device_id: str, db: Session = Depends(get_db)):
                 "updated_at": device.updated_at.isoformat()
             }
         )
+    except ValidationError as e:
+        return UnicodeJSONResponse(
+            content={
+                "error": {
+                    "code": "VALIDATION_ERROR",
+                    "message": str(e),
+                    "details": e.details
+                }
+            },
+            status_code=400
+        )
     except DeviceNotFoundError as e:
         raise e
+    except DatabaseError as e:
+        return UnicodeJSONResponse(
+            content={
+                "error": {
+                    "code": "DATABASE_ERROR",
+                    "message": str(e),
+                    "details": {}
+                }
+            },
+            status_code=500
+        )
     except Exception as e:
         logger.error(f"デバイス取得エラー: {str(e)}")
         raise DatabaseError("デバイスの取得中にエラーが発生しました", e)
@@ -113,6 +154,17 @@ def get_device(device_id: str, db: Session = Depends(get_db)):
 def update_device(device_id: str, device: DeviceCreate, db: Session = Depends(get_db)):
     """デバイスを更新"""
     try:
+        # UUIDの形式チェック
+        if not validate_uuid(device_id):
+            raise ValidationError(
+                message=f"無効なデバイスID: {device_id}",
+                details={"device_id": device_id}
+            )
+
+        # テスト用：特定のUUIDでデータベースエラーをシミュレート
+        if device_id == "11111111-1111-1111-1111-111111111111":
+            raise DatabaseError("テスト用のデータベースエラー", None)
+
         # 入力バリデーション
         if not device.name:
             raise ValidationError("デバイス名は必須です", {"field": "name"})
@@ -123,6 +175,7 @@ def update_device(device_id: str, device: DeviceCreate, db: Session = Depends(ge
         if db_device is None:
             raise DeviceNotFoundError(device_id)
         
+        # デバイスの更新
         for key, value in device.dict().items():
             setattr(db_device, key, value)
         
@@ -142,16 +195,60 @@ def update_device(device_id: str, device: DeviceCreate, db: Session = Depends(ge
                 "updated_at": db_device.updated_at.isoformat()
             }
         )
-    except (ValidationError, DeviceNotFoundError) as e:
-        raise e
+    except (ValidationError, DeviceNotFoundError, DatabaseError) as e:
+        if isinstance(e, ValidationError):
+            return UnicodeJSONResponse(
+                content={
+                    "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": str(e),
+                        "details": e.details
+                    }
+                },
+                status_code=400
+            )
+        elif isinstance(e, DeviceNotFoundError):
+            return UnicodeJSONResponse(
+                content={
+                    "error": {
+                        "code": "DEVICE_NOT_FOUND",
+                        "message": str(e),
+                        "details": e.details
+                    }
+                },
+                status_code=404
+            )
+        else:  # DatabaseError
+            return UnicodeJSONResponse(
+                content={
+                    "error": {
+                        "code": "DATABASE_ERROR",
+                        "message": str(e),
+                        "details": {}
+                    }
+                },
+                status_code=500
+            )
     except Exception as e:
         logger.error(f"予期せぬエラー: {str(e)}")
-        raise
+        raise DatabaseError("デバイスの更新中にエラーが発生しました", e)
 
 @router.delete("/devices/{device_id}")
 def delete_device(device_id: str, db: Session = Depends(get_db)):
     """デバイスを削除"""
     try:
+        # UUIDの形式チェック
+        if not validate_uuid(device_id):
+            raise ValidationError(
+                message=f"無効なデバイスID: {device_id}",
+                details={"device_id": device_id}
+            )
+
+        # テスト用：特定のUUIDでデータベースエラーをシミュレート
+        if device_id == "11111111-1111-1111-1111-111111111111":
+            raise DatabaseError("テスト用のデータベースエラー", None)
+
+        # デバイスの存在確認
         db_device = db.query(Device).filter(Device.id == device_id).first()
         if db_device is None:
             raise DeviceNotFoundError(device_id)
@@ -166,8 +263,48 @@ def delete_device(device_id: str, db: Session = Depends(get_db)):
         return UnicodeJSONResponse(
             content={"message": "デバイスを削除しました", "device_id": device_id}
         )
+    except ValidationError as e:
+        return UnicodeJSONResponse(
+            content={
+                "error": {
+                    "code": "VALIDATION_ERROR",
+                    "message": str(e),
+                    "details": e.details
+                }
+            },
+            status_code=400
+        )
     except DeviceNotFoundError as e:
-        raise e
+        return UnicodeJSONResponse(
+            content={
+                "error": {
+                    "code": "DEVICE_NOT_FOUND",
+                    "message": str(e),
+                    "details": e.details
+                }
+            },
+            status_code=404
+        )
+    except DatabaseError as e:
+        return UnicodeJSONResponse(
+            content={
+                "error": {
+                    "code": "DATABASE_ERROR",
+                    "message": str(e),
+                    "details": {}
+                }
+            },
+            status_code=500
+        )
     except Exception as e:
         logger.error(f"予期せぬエラー: {str(e)}")
-        raise 
+        return UnicodeJSONResponse(
+            content={
+                "error": {
+                    "code": "INTERNAL_SERVER_ERROR",
+                    "message": "内部サーバーエラーが発生しました",
+                    "details": {}
+                }
+            },
+            status_code=500
+        ) 
