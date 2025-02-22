@@ -16,6 +16,13 @@ logger = logging.getLogger(__name__)
 # 環境変数の読み込み
 load_dotenv()
 
+# テスト用の環境変数を一時的に設定
+os.environ['RDS_HOST'] = 'localhost'
+os.environ['RDS_PORT'] = '3306'
+os.environ['RDS_USER'] = 'root'
+os.environ['RDS_PASSWORD'] = 'okitasouji'
+os.environ['RDS_DATABASE'] = 'lambdadb'
+
 def generate_test_data():
     """テストデータを生成する"""
     return [
