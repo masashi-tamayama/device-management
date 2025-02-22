@@ -19,8 +19,8 @@ class UnicodeJSONResponse(JSONResponse):
             content,
             ensure_ascii=False,
             allow_nan=False,
-            indent=None,
-            separators=(",", ":")
+            indent=2,
+            separators=(",", ": ")
         ).encode("utf-8")
 
 router = APIRouter()
